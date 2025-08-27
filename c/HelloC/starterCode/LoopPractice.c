@@ -12,9 +12,14 @@
 
 
 
-
+void forLoopPractice(int x) {
+    for(int i = 0; i < x; i++) {
+        printf("Step: %d\n", i);
+    }
+}
 
 int main() {
-    
+    int x = 10;
+    forLoopPractice(x);
     return 0;
 }
