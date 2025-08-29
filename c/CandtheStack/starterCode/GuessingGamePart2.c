@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h> // for random number generation
+#include <string.h>
+#include <stdbool.h>
 
 
 int getRandomNumber(int min, int max) {
@@ -16,48 +18,69 @@ int getRandomNumber(int min, int max) {
 }
 
 int getInput() {
+    char buffer[20];
     int input = 0;
-    scanf("%d", &input); // not safe, fix in future!
+    scanf("%s", buffer);
+    input = atoi(buffer);
     return input; 
 }
 
-int runGame(int randomNumber) {
+bool runGame(int randomNumber, int *attempts, int *guesses, int maxAttempts) {
     int guess = 0;
-    int attempts = 0;
+    *attempts = 0;
 
-    while (guess != randomNumber) {
+    while (*attempts < maxAttempts) {
         printf("Enter your guess (1-100): ");
         guess = getInput();
-        attempts++;
+        guesses[*attempts] = guess;
+        (*attempts)++;
 
         if (guess < randomNumber) {
             printf("Too low! Try again.\n");
         } else if (guess > randomNumber) {
             printf("Too high! Try again.\n");
         } else {
-            printf("Congratulations! You guessed the number %d in %d attempts.\n", randomNumber, attempts);
+            printf("Congratulations! You guessed the number %d in %d attempts.\n", randomNumber, *attempts);
+            return true;
         }
     }
 
-    return attempts;
+    return false;
+}
+
+void giveFeedback(int randNum, bool found, int attempts, int *guesses) {
+    if(found) {
+        printf("You won! Attempts: %d\n", attempts);
+    } else {
+        printf("You Lost! The number was: %d. Attempts: %d\n", randNum, attempts);
+    }
+
+    printf("Your guesses were: ");
+    for(int i = 0; i < attempts; i++) {
+        printf(" %d", guesses[i]);
+    }
+    printf("\n");
 }
 
 void start() {
     printf("Welcome to the Guessing Game!\n");
-    int choice = 0;
+    char choice[20];
 
-    while(choice != 2) {
-        printf("1. Play Game\n");
-        printf("2. Exit\n");
+    while(strcasecmp(choice, "exit") != 0) {
+        printf("Play\n");
+        printf("Exit\n");
         printf("Enter your choice: ");
-        choice = getInput();
+        scanf("%s", choice);
 
-        if (choice == 1) {
+        if (strcasecmp(choice, "play") == 0) {
             // Call the game function here
             int randomNumber = getRandomNumber(1, 100);
+            int guesses[100];
+            int attempts = 0;
             printf("Starting the game...\n");
-            runGame(randomNumber);
-        } else if (choice == 2) {
+            bool found = runGame(randomNumber, &attempts, guesses, 100);
+            giveFeedback(randomNumber, found, attempts, guesses);
+        } else if (strcasecmp(choice, "exit") == 0) {
             printf("Exiting the game...\n");
         } else {
             printf("Invalid choice. Please try again.\n");
