@@ -67,9 +67,26 @@ def Merge(A, left, mid, right):
  *
  */
 
-void merge(int *arr, int size, int left, int mid, int right, int *swapMemory) {}
+void merge(int *arr, int size, int left, int mid, int right, int *swapMemory) {
+  int n1 = mid - left + 1;
+  int n2 = right - mid;
 
-void mergeSort(int *arr, int size, int left, int right, int *swapMemory) {}
+  int *L = swapMemory;
+  int *R = swapMemory + n1;
+
+  memcpy(L, arr + left, sizeof(int) * n1);
+  memcpy(R, arr + mid + 1, sizeof(int) * n2);
+}
+
+void mergeSort(int *arr, int size, int left, int right, int *swapMemory) {
+  if(left < right) {
+    int mid = left + (right - left) / 2;
+    mergeSort(arr, size, left, mid, swapMemory);
+    mergeSort(arr, size, mid + 1, right, swapMemory);
+
+    merge(arr, size, left, mid, right, *swapMemory);
+  }
+}
 
 void runMergeSort(int *arr, int size) {
   int swapMemory[size];
