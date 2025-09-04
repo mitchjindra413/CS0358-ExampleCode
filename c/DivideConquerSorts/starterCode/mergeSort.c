@@ -67,7 +67,7 @@ def Merge(A, left, mid, right):
  *
  */
 
-void merge(int *arr, int size, int left, int mid, int right, int *swapMemory) {
+void merge(int *arr, int left, int mid, int right, int *swapMemory) {
   int n1 = mid - left + 1;
   int n2 = right - mid;
 
@@ -76,21 +76,48 @@ void merge(int *arr, int size, int left, int mid, int right, int *swapMemory) {
 
   memcpy(L, arr + left, sizeof(int) * n1);
   memcpy(R, arr + mid + 1, sizeof(int) * n2);
+
+  int i = 0;
+  int j = 0;
+  int k = left;
+  while(i < n1 && j < n2) {
+    _ms_opCount++;
+    if(L[i] <= R[j]) {
+      arr[k] = L[i];
+      i++;
+    } else {
+      arr[k] = R[j];
+      j++;
+    }
+    k++;
+  }
+  while(i < n1) {
+    arr[k] = L[i];
+    k++;
+    i++;
+    _ms_opCount++;
+  }
+  while(j < n2) {
+    arr[k] = R[j];
+    k++;
+    j++;
+    _ms_opCount++;
+  }
 }
 
-void mergeSort(int *arr, int size, int left, int right, int *swapMemory) {
+void mergeSort(int *arr, int left, int right, int *swapMemory) {
   if(left < right) {
     int mid = left + (right - left) / 2;
-    mergeSort(arr, size, left, mid, swapMemory);
-    mergeSort(arr, size, mid + 1, right, swapMemory);
+    mergeSort(arr, left, mid, swapMemory);
+    mergeSort(arr, mid + 1, right, swapMemory);
 
-    merge(arr, size, left, mid, right, *swapMemory);
+    merge(arr, left, mid, right, swapMemory);
   }
 }
 
 void runMergeSort(int *arr, int size) {
   int swapMemory[size];
-  mergeSort(arr, size, 0, size - 1, swapMemory); // call the merge sort function
+  mergeSort(arr, 0, size - 1, swapMemory); // call the merge sort function
 }
 
 int main(int argc, char const *argv[]) {
