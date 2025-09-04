@@ -19,23 +19,85 @@ int * _swapMemory;
 int _DEBUG = 0; // debug flag
 
 void merge(int *arr, int left, int mid, int right, int *swapMemory) {
+  int n1 = mid - left + 1;
+  int n2 = right - mid;
 
+  int *L = swapMemory;
+  int *R = swapMemory + n1;
+
+  memcpy(L, arr + left, sizeof(int) * n1);
+  memcpy(R, arr + mid + 1, sizeof(int) * n2);
+
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  while(i < n1 && j < n2) {
+    if(L[i] <= R[j]) {
+      arr[k] = L[i];
+      i++;
+    } else {
+      arr[k] = R[j];
+      j++;
+    }
+    k++;
+  }
+  while(i < n1) {
+    arr[k] = L[i];
+    k++;
+  }
+  while(j < n1) {
+    arr[k] = R[j];
+    k++;
+  }
 }
 
 void mergeSort(int *arr, int left, int right, int *swapMemory) {
- 
+  if(left < right) {
+    int mid = left + (right - left) / 2;
+    mergeSort(arr, left, mid, swapMemory);
+    mergeSort(arr, 1 + mid, right, swapMemory);
+    merge(arr, left, mid, right, swapMemory);
+  }
 }
 
 void runMergeSort(int *arr, int size) {
-  
+  int swapMemory[size];
+  mergeSort(arr, 0, size - 1, swapMemory);
+}
+
+void swap(int *a, int *b) {
+  int temp = *a;
+  *a = *b;
+  *b = temp;
 }
 
 int partition(int *arr, int left, int right) {
- 
+  int p = arr[left];
+  int i = left;
+  int j = right;
+
+  while(i < j) {
+    while(arr[i] <= p && i <= right - 1) {
+      i++;
+    }
+    while (arr[j] > p && j >= left + 1) {
+        j--;
+    }
+    if (i < j) {
+        swap(&arr[i], &arr[j]);
+    }
+  }
+  swap(&arr[left], &arr[j]);
+  return j;
 }
 
 void quickSort(int *arr, int left, int right) {
-  
+  if(left < right) {
+    int par = partition(arr, left, right);
+
+    quickSort(arr, left, par + 1);
+    quickSort(arr, par - 1, right);
+  }
 }
 
 void runQuickSort(int *arr, int size) {
