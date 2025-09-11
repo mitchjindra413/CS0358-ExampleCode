@@ -19,7 +19,23 @@
  */
 NeuQueue *create_queue(size_t initial_capacity) {
   // TODO: Implement this function
-  return NULL;
+  NeuQueue *queue = (NeuQueue*)malloc(sizeof(NeuQueue));
+  if(queue == NULL) {
+    fprintf(stderr, "Memory allocation error\n");
+    return;
+  }
+  int *data = (int*)malloc(initial_capacity * sizeof(int));
+  if(data == NULL) {
+    fprintf(stderr, "Memory allocaiton error\n");
+    free(queue);
+    return;
+  }
+  queue->data = data;
+  queue->capacity = initial_capacity;
+  queue->front = 0;
+  queue->end = 0;
+  queue->size = 0;
+  return queue;
 }
 
 /**
@@ -29,6 +45,10 @@ NeuQueue *create_queue(size_t initial_capacity) {
  */
 void free_queue(NeuQueue *queue) {
   // TODO: Implement this function
+  if(queue != NULL) {
+    free(queue->data);
+    free(queue);
+  }
 }
 
 /**
@@ -39,7 +59,15 @@ void free_queue(NeuQueue *queue) {
  */
 int dequeue(NeuQueue *queue) {
   // TODO: Implement this function
-  return -1;
+  if(is_queue_empty(queue)) {
+    errno = ENODATA;
+    return -1;
+  }
+  errno = 0;
+  int value = queue->data[queue->front];
+  queue->front = (queue->front + 1) % queue->capacity;
+  queue->size--;
+  return value;
 }
 
 /**
@@ -52,7 +80,14 @@ int dequeue(NeuQueue *queue) {
  */
 bool enqueue(NeuQueue *queue, int value) {
   // TODO: Implement this function
-  return false;
+  if(is_queue_full(queue)) {
+    errno = ENOSPC;
+    return false;
+  }
+  errno = 0;
+  queue->data[queue->end] = value;
+  queue->end = (queue->end + 1) % queue->capacity;
+  return true;
 }
 
 /**
@@ -63,7 +98,7 @@ bool enqueue(NeuQueue *queue, int value) {
  */
 bool is_queue_empty(NeuQueue *queue) {
   // TODO: Implement this function
-  return true;
+  return queue->size == 0;
 }
 
 /**
@@ -74,7 +109,7 @@ bool is_queue_empty(NeuQueue *queue) {
  */
 bool is_queue_full(NeuQueue *queue) {
   // TODO: Implement this function
-  return false;
+  return queue->size == queue->capacity;
 }
 
 /**
@@ -85,7 +120,7 @@ bool is_queue_full(NeuQueue *queue) {
  */
 int get_queue_capacity(NeuQueue *queue) {
   // TODO: Implement this function
-  return 0;
+  return queue->capacity;
 }
 
 /**
@@ -96,7 +131,7 @@ int get_queue_capacity(NeuQueue *queue) {
  */
 int get_queue_size(NeuQueue *queue) {
   // TODO: Implement this function
-  return 0;
+  return queue->size;
 }
 
 /**
@@ -107,7 +142,7 @@ int get_queue_size(NeuQueue *queue) {
  */
 int peek_queue(NeuQueue *queue) {
   // TODO: Implement this function
-  return -1;
+  return queue->data[queue->front];
 }
 
 /**
