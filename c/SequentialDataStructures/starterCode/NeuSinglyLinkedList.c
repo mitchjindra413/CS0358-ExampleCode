@@ -19,7 +19,13 @@
  * fails.
  */
 Node *__sll_create_node(int value) {
-  return NULL; // TODO: Implement this function
+  Node *node = (Node*)malloc(sizeof(Node));
+  if(node == NULL) {
+    fprintf(stderr, "Memory Allocation Error\n");
+    return NULL;
+  }
+  node->data = value;
+  return node;
 }
 
 /**
@@ -28,7 +34,9 @@ Node *__sll_create_node(int value) {
  * @param node A pointer to the node to be freed.
  */
 void __sll_free_node(Node *node) {
-  // TODO: Implement this function
+  if(node != NULL) {
+    free(node);
+  }
 }
 
 /**
@@ -38,8 +46,14 @@ void __sll_free_node(Node *node) {
  * fails.
  */
 NeuSLL *sll_create() {
-  // TODO: Implement this function
-  return NULL;
+  NeuSLL *sll = (NeuSLL*)malloc(sizeof(NeuSLL));
+  if(sll == NULL) {
+    fprintf(stderr, "Memory Allocation Error\n");
+    return NULL;
+  }
+  sll->size = 0;
+  sll->head = NULL;
+  return sll;
 }
 
 /**
@@ -48,7 +62,12 @@ NeuSLL *sll_create() {
  * @param list A pointer to the list to be freed.
  */
 void sll_free(NeuSLL *list) {
-  // TODO: Implement this function
+  if(list == NULL) {
+    return;
+  }
+
+  
+  free(list);
 }
 
 /**
@@ -60,8 +79,15 @@ void sll_free(NeuSLL *list) {
  * out of bounds.
  */
 Node *__sll_get_node(NeuSLL *list, size_t index) {
-  // TODO: Implement this function
-  return NULL;
+  if(list == NULL || list->size <= index || index < 0) {
+    return NULL;
+  }
+
+  Node *curNode = list->head;
+  for(size_t i = 0; i < index; i++) {
+    curNode = curNode->next;
+  }
+  return curNode;
 }
 
 /**
@@ -73,8 +99,11 @@ Node *__sll_get_node(NeuSLL *list, size_t index) {
  * is out of bounds.
  */
 int get_sll_element(NeuSLL *list, size_t index) {
-  // TODO: Implement this function
-  return -1;
+  if(list == NULL || list->size <= index || index < 0) {
+    return -1;
+  }
+
+  return __sll_get_node(list, index)->data;
 }
 
 /**
@@ -85,7 +114,28 @@ int get_sll_element(NeuSLL *list, size_t index) {
  * @param value The value to insert.
  */
 void insert_sll_element(NeuSLL *list, size_t index, int value) {
-  // TODO: Implement this function
+  if(list == NULL || list->size <= index || index < 0) {
+    return;
+  }
+  Node *newNode = __sll_create_node(value);
+  if(newNode == NULL) {
+    return;
+  }
+
+  if(index == 0) {
+    newNode->next = list->head;
+    list->head = newNode;
+  } else {
+    Node *prev = __sll_get_node(list, index - 1);
+    if(prev != NULL) {
+      newNode->next = prev->next;
+      prev->next = newNode;
+    } else {
+      __sll_free_node(newNode);
+      return;
+    }
+  }
+  list->size++;
 }
 
 /**
@@ -95,8 +145,8 @@ void insert_sll_element(NeuSLL *list, size_t index, int value) {
  * @return true if the list is empty, false otherwise.
  */
 bool is_sll_empty(NeuSLL *list) {
-  // TODO: Implement this function
-  return true;
+  
+  return list->size == 0;
 }
 
 /**
@@ -107,7 +157,28 @@ bool is_sll_empty(NeuSLL *list) {
  * @return The value of the removed element, or -1 if the index is out of bounds.
  */
 int remove_sll_element(NeuSLL *list, size_t index) {
-  // TODO: Implement this function
+  if(list == NULL || index >= list->size || index < 0) {
+    return -1;
+  }
+
+  Node *removeNode = NULL;
+  if(index == 0) {
+    removeNode = list->head;
+    list->head = list->head->next;
+  } else {
+    Node *prev = __sll_get_node(list, index - 1);
+    if(prev != NULL) {
+      removeNode = prev->next;
+      prev->next = removeNode->next;
+    }
+  }
+
+  if(removeNode != NULL) {
+    int value = removeNode->data;
+    __sll_free_node(removeNode);
+    list->size--;
+    return value;
+  }
   return -1;
 }
 
@@ -118,8 +189,7 @@ int remove_sll_element(NeuSLL *list, size_t index) {
  * @return The number of elements in the list.
  */
 size_t get_sll_size(NeuSLL *list) {
-  // TODO: Implement this function
-  return 0;
+  return list->size;
 }
 
 /**
@@ -129,8 +199,7 @@ size_t get_sll_size(NeuSLL *list) {
  * @return The value of the popped element, or -1 if the list is empty.
  */
 int sll_pop(NeuSLL *list) {
-  // TODO: Implement this function
-  return -1;
+  return remove_sll_element(list, list->size - 1);
 }
 
 /**
@@ -140,7 +209,7 @@ int sll_pop(NeuSLL *list) {
  * @param value The value to push.
  */
 void sll_push(NeuSLL *list, int value) {
-  // TODO: Implement this function
+  insert_sll_element(list, 0, value);
 }
 
 /**
@@ -151,7 +220,10 @@ void sll_push(NeuSLL *list, int value) {
  * @param value The value to set at the specified index.
  */
 void set_sll_element(NeuSLL *list, size_t index, int value) {
-  // TODO: Implement this function
+  if(list == NULL || index >= list->size || index < 0) {
+    return;
+  }
+  __sll_get_node(list, index)->data = value;
 }
 
 /**
