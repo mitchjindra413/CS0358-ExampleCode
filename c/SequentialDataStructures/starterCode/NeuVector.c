@@ -16,7 +16,34 @@
  */
 NeuVector* create_vector(size_t initial_capacity) {
     // TODO: Implement this function
-    return NULL;
+    NeuVector* vector = (NeuVector*)malloc(sizeof(NeuVector));
+    if(vector == NULL) {
+        return NULL;
+    }
+    vector->data == (int*)malloc(initial_capacity * sizeof(int));
+    if(vector->data == NULL) {
+        free(vector);
+        return NULL;
+    }
+    vector->size = 0;
+    vector->capacity = initial_capacity;
+    return vector;
+}
+/**
+ * Resizes vector
+ * @param vector
+ * @param new_capacity
+ */
+void _neu_vector_resize(NeuVector* vector, int new_capacity) {
+    if(new_capacity > vector->capacity) {
+        int *new_data = (int*)realloc(vector->data, new_capacity * sizeof(int));
+        if(new_data != NULL) {
+            vector->data = new_data;
+            vector->capacity = new_capacity;
+        }
+    }  else {
+        fprintf(stderr, "Memory allocation failed\n");
+    }
 }
 
 /**
@@ -26,6 +53,10 @@ NeuVector* create_vector(size_t initial_capacity) {
  */
 void free_vector(NeuVector* vector) {
     // TODO: Implement this function
+    if(vector != NULL) {
+        free(vector->data);
+        free(vector);
+    }
 }
 
 /**
@@ -36,6 +67,7 @@ void free_vector(NeuVector* vector) {
  */
 void append_vector_element(NeuVector* vector, int value) {
     // TODO: Implement this function
+    insert_vector_element(vector, vector->size, value);
 }
 
 /**
@@ -47,6 +79,15 @@ void append_vector_element(NeuVector* vector, int value) {
  */
 int contains_element(NeuVector* vector, int value) {
     // TODO: Implement this function
+    if(vector == NULL) {
+        fprintf(stderr, "No vector");
+        return NULL;
+    }
+    for(size_t i = 0; i < vector->size; i++) {
+        if(vector->data[i] == value) {
+            return i;
+        }
+    }
     return -1;
 }
 
@@ -58,7 +99,11 @@ int contains_element(NeuVector* vector, int value) {
  */
 int get_vector_capacity(NeuVector* vector) {
     // TODO: Implement this function
-    return 0;
+    if(vector == NULL) {
+        fprintf(stderr, "No vector\n");
+        return NULL;
+    }
+    return vector->capacity;
 }
 
 /**
@@ -70,6 +115,19 @@ int get_vector_capacity(NeuVector* vector) {
  */
 int get_vector_element(NeuVector* vector, size_t index) {
     // TODO: Implement this function
+    if(vector == NULL) {
+        fprintf(stderr, "No vector\n");
+        return NULL;
+    }
+    if(index >= vector->size) {
+        fprintf(stderr, "Index out of bounds\n");
+        return NULL;
+    }
+    for(size_t i = 0; i < vector->size; i++) {
+        if(i == index) {
+            return vector->data[i];
+        }
+    }
     return -1;
 }
 
@@ -81,7 +139,11 @@ int get_vector_element(NeuVector* vector, size_t index) {
  */
 int get_vector_size(NeuVector* vector) {
     // TODO: Implement this function
-    return 0;
+    if(vector == NULL) {
+        fprintf(stderr, "No vector\n");
+        return NULL;
+    }
+    return vector->size;
 }
 
 /**
@@ -93,6 +155,18 @@ int get_vector_size(NeuVector* vector) {
  */
 void insert_vector_element(NeuVector* vector, size_t index, int value) {
     // TODO: Implement this function
+    if(index > vector->size) {
+        fprintf(stderr, "Index out of bounds.\n");
+        return;
+    }
+    if(vector->size == vector->capacity) {
+        _neu_vector_resize(vector, vector->capacity * SCALE_FACTOR);
+    }
+    for(size_t i = vector->size; i > index; i--) {
+        vector->data[i] = vector->data[i-1];
+    }
+    vector->data[index] = value;
+    vector->size++;
 }
 
 /**
@@ -103,7 +177,7 @@ void insert_vector_element(NeuVector* vector, size_t index, int value) {
  */
 int pop_vector_element(NeuVector* vector) {
     // TODO: Implement this function
-    return -1;
+    return remove_vector_element(vector, vector->size - 1);
 }
 
 /**
@@ -132,7 +206,22 @@ void print_vector(NeuVector* vector) {
  */
 int remove_vector_element(NeuVector* vector, size_t index) {
     // TODO: Implement this function
-    return -1;
+    if(vector == NULL) {
+        fprintf(stderr, "No vector\n");
+        return NULL;
+    }
+    if(index >= vector->size || index < 0) {
+        fprintf(stderr, "Index out of bounds\n");
+        errno = ERANGE;
+        return -1;
+    }
+    errno = 0;
+    int data = vector->data[index];
+    for(size_t i = 0; i < vector->size; i++) {
+        vector->data[i] = vector->data[i+1];
+    }
+    vector->size--;
+    return data;
 }
 
 /**
@@ -144,6 +233,15 @@ int remove_vector_element(NeuVector* vector, size_t index) {
  */
 void set_vector_element(NeuVector* vector, size_t index, int value) {
     // TODO: Implement this function
+    if(vector == NULL) {
+        fprintf(stderr, "No vector\n");
+        return;
+    }
+    if(index < 0 || index >= vector->size) {
+        fprintf(stderr, "Index out of bounds\n");
+        return;
+    }
+    vector->data[index] = value;
 }
 
 
