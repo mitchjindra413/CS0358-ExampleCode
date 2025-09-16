@@ -17,7 +17,20 @@
  * @return A pointer to the newly created priority queue.
  */
 NeuPriorityQueue* create_priority_queue(int capacity) {
-    //TODO: Implement
+    NeuPriorityQueue *pq = (NeuPriorityQueue*)malloc(sizeof(NeuPriorityQueue));
+    if(pq == NULL) {
+        return NULL;
+    }
+    int *data = (int*)malloc(capacity * sizeof(int));
+    if(!data) {
+        free(pq);
+        return NULL;
+    }
+    pq->capacity = capacity;
+    pq->data = data;
+    pq->size = 0;
+
+    return pq;
 }
 
 /**
@@ -25,7 +38,10 @@ NeuPriorityQueue* create_priority_queue(int capacity) {
  * @param queue A pointer to the priority queue to free.
  */
 void free_priority_queue(NeuPriorityQueue* queue) {
-    // TODO: Implement
+    if(queue) {
+        free(queue->data);
+        free(queue);
+    }
 }
 
 /**
@@ -61,8 +77,8 @@ void enqueue(NeuPriorityQueue* queue, int value) {
  * @return true if the queue has items, false otherwise.
  */
 bool has_items(NeuPriorityQueue* queue) {
-    // TODO: Implement
-    return false;
+    
+    return queue->size > 0;
 }
 
 /**
@@ -71,7 +87,9 @@ bool has_items(NeuPriorityQueue* queue) {
  * @return The value of the highest-priority element.
  */
 int peek(NeuPriorityQueue* queue) {
-    // TODO: Implement
+    if(!queue) {
+        return -1;
+    }
     return 0;
 }
 

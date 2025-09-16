@@ -14,15 +14,65 @@ int _debug = 0;
 
 enum { TABULATION = 2, NO_TABULATION = 1 };
 
+char *getSubstring(int max, int end, const char *str) {
+  if(max <= 0 || end <= 0) {
+    return NULL;
+  }
+  char *res = (char*)malloc((max + 1) * sizeof(char));
+  if(!res) {
+    fprintf(stderr, "Memory Allocation Failed\n");
+    return NULL;
+  }
+  strncpy(res, str + end - max, max);
+  res[max] = '\0';
+  return res;
+}
+
 char *longest_common_substring_no_tabulation(const char *str_one,
                                              const char *str_two) {
+  int l1 = strlen(str_one);
+  int l2 = strlen(str_two);
+  int max = 0;
+  int end_index = 0;
 
-  return NULL;
+  for(int i = 0; i < l1; i++) {
+    for(int j = 0; j < l2; j++) {
+      int k = 0;
+      while(i + k < l1 && j + k < l2 && str_one[i + k] == str_two[j + k]) {
+        k++;
+      }
+      if(k > max) {
+        max = k;
+        end_index = i + k;
+      }
+    }
+  }
+
+  return getSubstring(max, end_index, str_one);
 }
 
 char *longest_common_substring_with_tabulation(const char *str_one,
                                                const char *str_two) {
-  return NULL;
+  int l1 = strlen(str_one);
+  int l2 = strlen(str_two);
+  int max = 0;
+  int endIdx = 0;
+
+  int tab[l1 + 1][l2 + 1];
+  memset(tab, 0, sizeof(tab));
+
+  for(int i = 1; i <= l1; i++) {
+    for(int j = 1; j <= l2; j++) {
+      if(str_one[i - 1] == str_two[j - 1]) {
+        tab[i][j] = tab[i-1][j-1] + 1;
+        if(tab[i][j] > max) {
+          max = tab[i][j];
+          endIdx = i;
+        }
+      }
+    }
+  }
+  return getSubstring(max, endIdx, str_one);
 }
 
 int time_substring(char *(*func)(const char *, const char *),
