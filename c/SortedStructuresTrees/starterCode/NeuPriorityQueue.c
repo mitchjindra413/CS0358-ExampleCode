@@ -58,8 +58,19 @@ void clear_priority_queue(NeuPriorityQueue* queue) {
  * @return The value of the highest-priority element.
  */
 int dequeue(NeuPriorityQueue* queue) {
-    // TODO: Implement
-    return 0;
+    if(!has_items(queue)) {
+        fprintf(stderr, "Queue is empty\n");
+    }
+    int highestPrio = queue->data[queue->size - 1];
+    queue->size--;
+    return highestPrio;
+}
+
+void _doubleQueue(NeuPriorityQueue *queue) {
+    int newCapacity = queue->capacity * SCALE_FACTOR;
+    int *newData = (int*)realloc(queue->data, newCapacity * sizeof(int));
+    queue->data = newData;
+    queue->capacity = newCapacity;
 }
 
 /**
@@ -68,7 +79,20 @@ int dequeue(NeuPriorityQueue* queue) {
  * @param value The value to add to the queue.
  */
 void enqueue(NeuPriorityQueue* queue, int value) {
-    // TODO: Implement
+    if(queue->size >= queue->capacity) {
+        _doubleQueue(queue);
+    }
+    if(queue->size == 0) {
+        queue->data[0] = value;
+    } else {
+        int i = queue->size - 1;
+        while(i >= 0 && queue->data[i] >= value) {
+            queue->data[i+ 1] = queue->data[i];
+            i--;
+        }
+        queue->data[i+1] = value;
+    }
+    queue->size++;
 }
 
 /**
@@ -90,7 +114,7 @@ int peek(NeuPriorityQueue* queue) {
     if(!queue) {
         return -1;
     }
-    return 0;
+    return queue->data[0];
 }
 
 /**
@@ -98,5 +122,12 @@ int peek(NeuPriorityQueue* queue) {
  * @param queue A pointer to the priority queue.
  */
 void print_priority_queue(NeuPriorityQueue* queue) {
-    // TODO: Implement
+    if(queue == NULL) {
+        return;
+    }
+    printf("Priority Queue: [")
+    for(int i = queue->size - 1; i >= 0; i--) {
+        printf("%d ", queue->data[i]);
+    }
+    printf("]\n");
 }
