@@ -125,7 +125,7 @@ void print_priority_queue(NeuPriorityQueue* queue) {
     if(queue == NULL) {
         return;
     }
-    printf("Priority Queue: [")
+    printf("Priority Queue: [");
     for(int i = queue->size - 1; i >= 0; i--) {
         printf("%d ", queue->data[i]);
     }
