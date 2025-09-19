@@ -22,8 +22,23 @@
  * @return A pointer to the newly created AdjMatrixGraph.
  */
 AdjMatrixGraph* createGraph(int capacity, bool isDirected) {
-    //TODO: Implement
-    return NULL;
+    AdjMatrixGraph *graph = (AdjMatrixGraph*)malloc(sizeof(AdjMatrixGraph));
+    if(!graph) {
+        return NULL;
+    }
+    graph->capacity = capacity;
+    graph->numVertices = 0;
+    graph->directed = isDirected;
+    graph->adjMatrix = (int*)malloc(capacity * capacity * sizeof(int));
+    if(!graph->adjMatrix) {
+        free(graph);
+        return NULL;
+    }
+    int cap2 = capacity * capacity;
+    for(int i = 0; i < cap2; i++) {
+        graph->adjMatrix[i] = DEFAULT_WEIGHTS;
+    }
+    return graph;
 }
 
 /**
@@ -31,7 +46,10 @@ AdjMatrixGraph* createGraph(int capacity, bool isDirected) {
  * @param graph A pointer to the AdjMatrixGraph to free.
  */
 void freeGraph(AdjMatrixGraph* graph) {
-    //TODO: Implement
+    if(graph) {
+        free(graph->adjMatrix);
+        free(graph);
+    }
 }
 
 /**
@@ -66,7 +84,20 @@ void __resizeGraph(AdjMatrixGraph* graph) {
  * @param weight The weight of the edge.
  */
 void addEdge(AdjMatrixGraph* graph, int src, int dest, int weight) {
-    //TODO: Implement
+    if(src < 0 || dest < 0) {
+        return;
+    }
+    graph->numVertices = (src >= graph->numVertices) ? src + 1 : graph->numVertices;
+    graph->numVertices = (dest >= graph->numVertices) ? dest + 1 : graph->numVertices;
+
+    if(graph->numVertices >= graph->capacity) {
+        __resizeGraph(graph);
+    }
+
+    graph->adjMatrix[src * graph->capacity + dest] = weight;
+    if(!graph->directed) {
+        graph->adjMatrix[dest * graph->capacity + src] = weight;
+    }
 }
 
 /**
@@ -76,8 +107,13 @@ void addEdge(AdjMatrixGraph* graph, int src, int dest, int weight) {
  * @return The degree of the vertex.
  */
 int getDegree(AdjMatrixGraph* graph, int vertex) {
-    //TODO: Implement
-    return 0;
+    int degree = 0;
+    for(int i = 0; i < graph->numVertices; i++) {
+        if(graph->adjMatrix[vertex * graph->capacity + i] != DEFAULT_WEIGHTS) {
+            degree++;
+        }
+    }
+    return degree;
 }
 
 /**
@@ -87,8 +123,22 @@ int getDegree(AdjMatrixGraph* graph, int vertex) {
  * @return A pointer to an array of neighbor vertex indices (caller must free).
  */
 int* getNeighbors(AdjMatrixGraph* graph, int vertex) {
-    //TODO: Implement
-    return NULL;
+    if (vertex < 0 || vertex >= graph->numVertices) {
+        fprintf(stderr, "Error: Vertex out of bounds\n");
+        return NULL;
+    }
+    int* neighbors = (int*)malloc(graph->numVertices * sizeof(int));
+    if (neighbors == NULL) {
+        return NULL; // Handle memory allocation failure
+    }
+    int count = 0;
+    for (int i = 0; i < graph->numVertices; i++) {
+        if (graph->adjMatrix[vertex * graph->capacity + i] != DEFAULT_WEIGHTS) {
+            neighbors[count++] = i;
+        }
+    }
+    neighbors[count] = -1; // Mark end of neighbors
+    return neighbors;
 }
 
 /**
@@ -99,8 +149,7 @@ int* getNeighbors(AdjMatrixGraph* graph, int vertex) {
  * @return The weight of the edge, or 0 if no edge exists.
  */
 int getWeight(AdjMatrixGraph* graph, int src, int dest) {
-    //TODO: Implement
-    return 0;
+    return graph->adjMatrix[src * graph->capacity + dest];
 }
 
 /**
@@ -112,7 +161,18 @@ int getWeight(AdjMatrixGraph* graph, int src, int dest) {
  * @param filename The name of the file to load the graph from.    
  */
 void loadFromFile(AdjMatrixGraph* graph, const char* filename) {
-    //TODO: Implement
+    GraphReader *reader = reader_open(filename);
+    int src, dest, weight;
+    int *line;
+
+    while((line = reader_next(reader)) != NULL) {
+        src = line[0];
+        dest = line[1];
+        weight = line[2];
+        addEdge(graph, src, dest, weight);
+    }
+
+    reader_close(reader);
 }
 
 
