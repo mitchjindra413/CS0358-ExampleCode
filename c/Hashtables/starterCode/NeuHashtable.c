@@ -9,6 +9,17 @@
 
 #include "NeuHashtable.h"
 
+NeuNode **_createNeuNodeTable(int capacity) {
+  NeuNode **table = (NeuNode**)malloc(capacity * sizeof(NeuNode));
+  if(!table) {
+    return NULL;
+  }
+  for(int i = 0; i < capacity; i++) {
+    table[i] = NULL;
+  }
+  return table;
+}
+
 /**
  * Creates a new hashtable with the given capacity.
  * For the capacity, it will find the nearest power of two greater than or equal
@@ -18,8 +29,16 @@
  * @return A pointer to the newly created hashtable.
  */
 NeuHashtable *create_hashtable(int capacity) {
-  // TODO: Implement
-  return NULL;
+  int newCapacity = 1;
+  while(newCapacity < capacity) {
+    newCapacity *= 2;
+  }
+
+  NeuHashtable *hashtable = (NeuHashtable*)malloc(sizeof(NeuHashtable));
+  hashtable->capacity = newCapacity;
+  hashtable->size = 0;
+  hashtable->table = _createNeuNodeTable(newCapacity);
+  return hashtable;
 }
 
 /**
@@ -27,7 +46,61 @@ NeuHashtable *create_hashtable(int capacity) {
  * @param hashtable A pointer to the hashtable to free.
  */
 void free_hashtable(NeuHashtable *hashtable) {
-  // TODO: Implement
+  if(hashtable) {
+    for(int i = 0; i < hashtable->capacity; i++) {
+      NeuNode *cur = hashtable->table[i];
+      while(cur) {
+        NeuNode *tmp = cur;
+        cur = cur->next;
+        free(tmp);
+      }
+    }
+    free(hashtable->table);
+    free(hashtable);
+  }
+}
+
+size_t _djb2HashFunction(const char *key) {
+  size_t hash = 5381;
+  int c;
+  while((c = *key++)) {
+    hash = ((hash << 5) + hash) + c; //hash * 33 + c
+  }
+
+  return hash;
+}
+
+size_t _getIndex(const char *key, size_t capacity) {
+  return _djb2HashFunction(key) & (capacity - 1); // hash % capacity - works because capacity is power of 2
+}
+
+NeuNode *_createNeuNode(const char *itemId, const char *itemName, double itemPrice, int itemQuantity) {
+  NeuNode *node = (NeuNode*)malloc(sizeof(NeuNode));
+  strcpy(node->data.itemID, itemId);
+  strcpy(node->data.itemName, itemName);
+  node->data.itemPrice = itemPrice;
+  node->data.itemQuantity = itemQuantity;
+  node->next = NULL;
+  return node;
+}
+
+void _doubleCapacity(NeuHashtable *hashtable) {
+  int newCapacity = hashtable->capacity * SCALE_FACTOR;
+  NeuNode **newTable = _createNeuNodeTable(newCapacity);
+
+  for(int i = 0; i < hashtable->capacity; i++) {
+    NeuNode *cur = hashtable->table[i];
+    while(cur) {
+      size_t hashIndex = _getIndex(cur->data.itemID, newCapacity);
+      NeuNode *next = cur->next;
+      cur->next = newTable[hashIndex];
+      newTable[hashIndex] = cur;
+      cur = next;
+    }
+  }
+  free(hashtable->table);
+  hashtable->table = newTable;
+  hashtable->capacity = newCapacity;
 }
 
 /**
@@ -40,7 +113,18 @@ void free_hashtable(NeuHashtable *hashtable) {
  */
 void add_item(NeuHashtable *hashtable, const char *itemID, const char *itemName,
               double itemPrice, int itemQuantity) {
-  // TODO: Implement
+  if(get_item(hashtable, itemID)) {
+    //all ready exists
+    return;
+  }
+  if(get_load_factor(hashtable) > LOAD_FACTOR) {
+    _doubleCapacity(hashtable);
+  }
+  size_t hashIndex = _getIndex(itemID, hashtable->capacity);
+  NeuNode *node = _createNeuNode(itemID, itemName, itemPrice, itemQuantity);
+  node->next = hashtable->table[hashIndex];
+  hashtable->table[hashIndex] = node;
+  hashtable->size++;
 }
 
 /**
@@ -50,7 +134,14 @@ void add_item(NeuHashtable *hashtable, const char *itemID, const char *itemName,
  * @return A pointer to the item if found, or NULL if not found.
  */
 Item *get_item(NeuHashtable *hashtable, const char *itemID) {
-  // TODO: Implement
+  size_t hashIndex = _getIndex(itemID, hashtable->capacity);
+  NeuNode *cur = hashtable->table[hashIndex];
+  while(cur) {
+    if(strcmp(cur->data.itemID, itemID) == 0) {
+      return &cur->data;
+    }
+    cur = cur->next;
+  }
   return NULL;
 }
 
@@ -60,7 +151,7 @@ Item *get_item(NeuHashtable *hashtable, const char *itemID) {
  * @return The load factor of the hashtable.
  */
 inline double get_load_factor(NeuHashtable* hashtable) {
-    return 0.0; // TODO: Implement
+    return (double) hashtable->size / hashtable->capacity;
 }
 
 /**
@@ -69,7 +160,23 @@ inline double get_load_factor(NeuHashtable* hashtable) {
  * @param itemID The ID of the item to remove.
  */
 void remove_item(NeuHashtable *hashtable, const char *itemID) {
-  // TODO: Implement
+  int hashIndex = _getIndex(itemID, hashtable->capacity);
+  NeuNode *cur = hashtable->table[hashIndex];
+  NeuNode *prev = NULL;
+  while(cur) {
+    if(strcmp(cur->data.itemID, itemID) == 0) {
+      if(prev) {
+        prev->next = cur->next;
+      } else {
+        hashtable->table[hashIndex] = cur->next;
+      }
+      free(cur);
+      hashtable->size--;
+      return;
+    }
+    prev = cur;
+    cur = cur->next;
+  }
 }
 
 /**
